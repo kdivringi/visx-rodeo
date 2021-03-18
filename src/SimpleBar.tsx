@@ -14,6 +14,6 @@ export default function SimpleBar({ width, height }: { width: number, height: nu
         <Axis orientation='left' />
         <Axis orientation='bottom' />
         <BarSeries data={data} dataKey='val' xAccessor={d => d.key} yAccessor={d => d.val} />
-        <Tooltip renderTooltip={d => (<p>{`Stuff: ${JSON.stringify(d.tooltipData?.nearestDatum.datum.val)}`}</p>)} />
+        <Tooltip renderTooltip={d => (<p>{`Stuff: ${JSON.stringify((d as any).tooltipData?.nearestDatum.datum.val)}`}</p>)} />
     </XYChart>)
 }
