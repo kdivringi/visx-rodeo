@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import './App.css'
 import SimpleBar from './SimpleBar';
 import { BarGrouped, BarStacked } from './SimpleBarGroup'
-import { withParentSize, ParentSize } from '@visx/responsive';
+import CalendarPlot from './CalendarPlot';
+import {  ParentSize } from '@visx/responsive';
 
 interface IChartEntry {
   name: string;
@@ -13,7 +14,8 @@ interface IChartEntry {
 const CHARTS: IChartEntry[] = [
   { name: "Let's make a bar chart", component: SimpleBar, key: 'xyBar' },
   { name: "Grouped Bars", component: BarGrouped, key: 'groupBar' },
-  { name: "Stacked Bars", component: BarStacked, key: 'stackBar' }
+  { name: "Stacked Bars", component: BarStacked, key: 'stackBar' },
+  { name: "Calendar Plot (WIP)", component: CalendarPlot, key: 'calendar'}
 ]
 
 function App() {
@@ -21,9 +23,13 @@ function App() {
   const selectedChart = CHARTS.find(c => c.key === chart);
 
   useEffect(()=> {
-    if (window.location.hash) {
-      setChart(window.location.hash.slice(1))
+    function listenHash() {
+      if (window.location.hash) {
+        setChart(window.location.hash.slice(1))
+      }
     }
+    window.addEventListener('hashchange', listenHash);
+    return () => window.removeEventListener('hashchange', listenHash)
   }, [])
 
   return (
@@ -33,6 +39,10 @@ function App() {
       </header>
       <nav className="App-nav">
         {CHARTS.map(({ name, key }) => (<a className="Chart-link" key={key} href={`#${key}`} onClick={() => setChart(key)}>{name}</a>))}
+        <div>Sankey</div>
+        <div>SPLOM</div>
+        <div>Sparklines</div>
+        <div>Hexbins</div>
       </nav>
       <article className="App-content">{selectedChart && (
         <ParentSize>
