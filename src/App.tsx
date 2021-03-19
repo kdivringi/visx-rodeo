@@ -44,6 +44,7 @@ function App() {
         <div>SPLOM</div>
         <div>Sparklines</div>
         <div>Hexbins</div>
+        <hr/>
         <div><a href="https://github.com/kdivringi/visx-rodeo">(repo)</a></div>
       </nav>
       <article className="App-content">{selectedChart && (
