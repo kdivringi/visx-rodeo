@@ -24,9 +24,9 @@ export default function CalendarPlot({ width, height }: { width: number, height:
     // const yScale = scaleOrdinal({ domain: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], range: [0, height] })
     const yScale = scaleLinear({ domain: [0, 7], range: [0, squareEdge] })
     const colorScale = scaleLinear({ domain: [0, 25], range: ['#efedf5', '#bcbddc', '#756bb1'] });
-    useEffect(() => {
-        console.log(binData, weekStarts)
-    }, [])
+    // useEffect(() => {
+    //     console.log(binData, weekStarts)
+    // }, [])
     return (
         <svg height={squareEdge} width={squareEdge}>
             {/* <rect x={0} y={0} width={width} height={height} fill="wheat"/> */}
