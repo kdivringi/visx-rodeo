@@ -28,6 +28,7 @@ function App() {
         setChart(window.location.hash.slice(1))
       }
     }
+    listenHash();
     window.addEventListener('hashchange', listenHash);
     return () => window.removeEventListener('hashchange', listenHash)
   }, [])
@@ -35,7 +36,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        VisX rodeo
+        VisX rodeo 
       </header>
       <nav className="App-nav">
         {CHARTS.map(({ name, key }) => (<a className="Chart-link" key={key} href={`#${key}`} onClick={() => setChart(key)}>{name}</a>))}
@@ -43,6 +44,7 @@ function App() {
         <div>SPLOM</div>
         <div>Sparklines</div>
         <div>Hexbins</div>
+        <div><a href="https://github.com/kdivringi/visx-rodeo">(repo)</a></div>
       </nav>
       <article className="App-content">{selectedChart && (
         <ParentSize>
