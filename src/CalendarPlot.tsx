@@ -78,8 +78,8 @@ export default function CalendarPlot({
 }) {
   const margin = { top: 25, right: 25, left: 25, bottom: 35 };
   const squareEdge = Math.min(
-    width - margin.right - margin.left,
-    height - margin.top - margin.bottom
+    Math.max(width, 300) - margin.right - margin.left,
+    Math.max(height, 300) - margin.top - margin.bottom
   );
   const yBins = 7;
   const xBins = weekStarts.length;
