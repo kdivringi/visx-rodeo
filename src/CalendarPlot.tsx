@@ -1,5 +1,4 @@
-import { eachWeekOfInterval } from 'date-fns'
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { HeatmapRect } from '@visx/heatmap';
 import { getSeededRandom, genBins } from '@visx/mock-data';
 import { scaleOrdinal, scaleTime, scaleLinear, scalePoint } from '@visx/scale';
@@ -9,7 +8,7 @@ import * as time from 'd3-time'
 import * as array from 'd3-array';
 
 const [minDate, maxDate] = [new Date(2021, 1, 7), new Date(2021, 2, 27)]
-const weekStarts = eachWeekOfInterval({ start: minDate, end: maxDate })
+const weekStarts = time.timeWeeks( minDate, maxDate );
 
 const seededRandom = getSeededRandom(0.41);
 const binData = genBins(
