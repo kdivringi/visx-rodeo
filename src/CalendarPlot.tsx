@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import { HeatmapRect } from "@visx/heatmap";
-import { getSeededRandom, genBins, cityTemperature } from "@visx/mock-data";
+import { genBins, cityTemperature } from "@visx/mock-data";
 import { scaleTime, scaleLinear } from "@visx/scale";
 import { Group } from "@visx/group";
 import { AxisBottom, AxisRight } from "@visx/axis";
@@ -19,42 +18,40 @@ const [minDate, maxDate] = array.extent(
 ) as [Date, Date];
 
 const df = array.group(cityTemperature, (d) => toWeekYear(new Date(d.date)));
-const binDf: ReturnType<typeof genBins> = [];
+const binDf: {
+  "San Francisco": ReturnType<typeof genBins>;
+  Austin: ReturnType<typeof genBins>;
+  "New York": ReturnType<typeof genBins>;
+} = { Austin: [], "San Francisco": [], "New York": [] };
 
 const weekStarts = time.timeWeeks(minDate, maxDate);
 
-const city = "San Francisco";
-// const city = 'Austin'
-// const city = 'New York'
 for (const [i, week] of weekStarts.entries()) {
   const weekYear = toWeekYear(week);
   if (!df.has(weekYear)) {
     continue;
   }
   const days = df.get(weekYear) as NonNullable<ReturnType<typeof df.get>>;
-  const newBin = {
-    bin: i,
-    bins: days.map((d) => ({
-      bin: Number(toDay(new Date(d.date))),
-      count: Number(d[city]),
-    })),
-  };
-  binDf.push(newBin);
+
+  for (const city of Object.keys(binDf)) {
+    const newBin = {
+      bin: i,
+      bins: days.map((d) => ({
+        bin: Number(toDay(new Date(d.date))),
+        // @ts-ignore
+        count: Number(d[city]),
+      })),
+    };
+    // @ts-ignore
+    binDf[city].push(newBin);
+  }
 }
 
-const [minTemp, maxTemp] = array.extent(cityTemperature, (d) =>
-  Number(d[city])
-) as [number, number];
-// const [minDate, maxDate] = [new Date(2021, 1, 7), new Date(2021, 2, 27)];
-
-const seededRandom = getSeededRandom(0.41);
-const binData = genBins(
-  /* length = */ weekStarts.length,
-  /* height = */ 7,
-  /** binFunc */ (idx) => 150 * idx,
-  /** countFunc */ (i, number) => 25 * (number - i) * seededRandom()
-);
-console.log(df,binDf);
+const [minTemp, maxTemp] = array.extent([
+  ...cityTemperature.map((c) => +c.Austin),
+  ...cityTemperature.map((c) => +c["New York"]),
+  ...cityTemperature.map((c) => +c["San Francisco"]),
+]) as [number, number];
 
 function midPoints(
   scale: ReturnType<typeof scaleLinear>,
@@ -79,10 +76,10 @@ export default function CalendarPlot({
   width: number;
   height: number;
 }) {
-  const margin = { top: 25, right: 25, left: 25 };
+  const margin = { top: 25, right: 25, left: 25, bottom: 35 };
   const squareEdge = Math.min(
     width - margin.right - margin.left,
-    height - margin.top
+    height - margin.top - margin.bottom
   );
   const yBins = 7;
   const xBins = weekStarts.length;
@@ -102,41 +99,41 @@ export default function CalendarPlot({
     domain: [minTemp, maxTemp],
     range: ["#efedf5", "#756bb1"],
   });
-  useEffect(() => {
-    // @ts-ignore
-    window.scaleC = colorScale;
-  });
+  const plotHeight = margin.top + margin.bottom + rectHeight;
+
   return (
     <svg
-      height={rectHeight + margin.top}
+      height={plotHeight * 3}
       width={rectHeight + margin.right + margin.left}
       css={{ overflow: "visible" }}
     >
-      <Group top={margin.top}>
-        <Text
-          dx={rectWidth / 2}
-          dy={-margin.top / 2}
-          textAnchor="middle"
-          verticalAnchor="middle"
-        >
-          {city}
-        </Text>
-        <HeatmapRect
-          data={binDf}
-          binWidth={binSide}
-          binHeight={binSide}
-          xScale={(d) => xScale(d)}
-          yScale={(d) => yScale(d)}
-          colorScale={colorScale}
-        />
-        <AxisBottom top={rectHeight} scale={xTimeScale} />
-        <AxisRight
-          left={rectWidth}
-          scale={yScale}
-          tickValues={midPoints(yScale, 7)}
-          tickFormat={(t) => dayNames[Math.floor(t.valueOf())]}
-        />
-      </Group>
+      {Object.entries(binDf).map(([city, cityData], i) => (
+        <Group key={city} top={margin.top + plotHeight * i}>
+          <Text
+            dx={rectWidth / 2}
+            dy={-margin.top / 2}
+            textAnchor="middle"
+            verticalAnchor="middle"
+          >
+            {city}
+          </Text>
+          <HeatmapRect
+            data={cityData}
+            binWidth={binSide}
+            binHeight={binSide}
+            xScale={(d) => xScale(d)}
+            yScale={(d) => yScale(d)}
+            colorScale={colorScale}
+          />
+          <AxisBottom top={rectHeight} scale={xTimeScale} />
+          <AxisRight
+            left={rectWidth}
+            scale={yScale}
+            tickValues={midPoints(yScale, 7)}
+            tickFormat={(t) => dayNames[Math.floor(t.valueOf())]}
+          />
+        </Group>
+      ))}
     </svg>
   );
 }

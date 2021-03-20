@@ -44,7 +44,7 @@ const CHARTS: IChartEntry[] = [
   { name: "Let's make a bar chart", component: SimpleBar, key: "xyBar" },
   { name: "Grouped Bars", component: BarGrouped, key: "groupBar" },
   { name: "Stacked Bars", component: BarStacked, key: "stackBar" },
-  { name: "Calendar Plot (WIP)", component: CalendarPlot, key: "calendar" },
+  { name: "Calendar Plot", component: CalendarPlot, key: "calendar" },
 ];
 
 function App() {
