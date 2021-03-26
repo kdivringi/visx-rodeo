@@ -1,5 +1,6 @@
 import { HeatmapRect } from "@visx/heatmap";
 import { genBins, cityTemperature } from "@visx/mock-data";
+import { CityTemperature } from "@visx/mock-data/lib/mocks/cityTemperature";
 import { scaleTime, scaleLinear } from "@visx/scale";
 import { Group } from "@visx/group";
 import { AxisBottom, AxisRight } from "@visx/axis";
@@ -18,11 +19,13 @@ const [minDate, maxDate] = array.extent(
 ) as [Date, Date];
 
 const df = array.group(cityTemperature, (d) => toWeekYear(new Date(d.date)));
-const binDf: {
-  "San Francisco": ReturnType<typeof genBins>;
-  Austin: ReturnType<typeof genBins>;
-  "New York": ReturnType<typeof genBins>;
-} = { Austin: [], "San Francisco": [], "New York": [] };
+type City = "San Francisco" | "Austin" | "New York";
+type BinDf = Record<City, NonNullable<ReturnType<typeof genBins>>>;
+const binDf: BinDf = {
+  Austin: [],
+  "San Francisco": [],
+  "New York": [],
+};
 
 const weekStarts = time.timeWeeks(minDate, maxDate);
 
@@ -36,14 +39,12 @@ for (const [i, week] of weekStarts.entries()) {
   for (const city of Object.keys(binDf)) {
     const newBin = {
       bin: i,
-      bins: days.map((d) => ({
+      bins: days.map((d: CityTemperature) => ({
         bin: Number(toDay(new Date(d.date))),
-        // @ts-ignore
-        count: Number(d[city]),
+        count: Number(d[city as City]),
       })),
     };
-    // @ts-ignore
-    binDf[city].push(newBin);
+    binDf[city as City].push(newBin);
   }
 }
 
