@@ -19,7 +19,7 @@ import {
   BarRounded,
 } from "@visx/shape";
 import { Text } from "@visx/text";
-import { css } from "@emotion/react";
+import tw from "twin.macro";
 
 interface Node {
   name: string;
@@ -58,13 +58,6 @@ function indexToGradient(i: number) {
   return i % gradientSeq.length;
 }
 
-const linkClass = css`
-  opacity: 0.2;
-  &:hover {
-    opacity: 0.6;
-  }
-`;
-
 export default function SankeyPlot({ height, width }: ChartProps) {
   const graph = useMemo(
     () =>
@@ -98,7 +91,7 @@ export default function SankeyPlot({ height, width }: ChartProps) {
             fill="none"
             stroke="grey"
             strokeWidth={link.width}
-            css={linkClass}
+            tw="opacity-20 hover:opacity-60"
           />
         ))}
       </g>
