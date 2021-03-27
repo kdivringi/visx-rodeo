@@ -75,18 +75,25 @@ export default function SankeyPlot({ height, width }: ChartProps) {
     [graph]
   );
 
-  const handleSelect = useCallback(node => {
+  const handleSelect = useCallback(
+    (node) => {
       const id = layout.nodeId()(node) as string;
-      if (selected === id) setSelected('');
+      if (selected === id) setSelected("");
       else setSelected(id);
-  }, [selected])
+    },
+    [selected]
+  );
 
   const activeLinks = useMemo(() => {
-      if (selected === '') return new Set();
-      return new Set(graph.links.filter(l => 
-          layout.nodeId()(l.source as any) === selected || layout.nodeId()(l.target as any) === selected
-      ));
-  },[selected, graph])
+    if (selected === "") return new Set();
+    return new Set(
+      graph.links.filter(
+        (l) =>
+          layout.nodeId()(l.source as any) === selected ||
+          layout.nodeId()(l.target as any) === selected
+      )
+    );
+  }, [selected, graph]);
 
   return (
     <svg height={height} width={width}>
@@ -122,20 +129,22 @@ export default function SankeyPlot({ height, width }: ChartProps) {
         ))}
       </g>
       <g>
-        {graph.nodes.map((node) => { 
-        const nodeId = layout.nodeId()(node);
-          return (<BarRounded
-            x={node.x0!}
-            height={node.y1! - node.y0!}
-            width={node.x1! - node.x0!}
-            y={node.y0 as number}
-            onClick={() => handleSelect(node)}
-            radius={2.5}
-            fill={`url(#${gradientSeq[indexToGradient(node.index!)].name})`}
-            all
-            css={[selected === nodeId && tw`animate-pulse`]}
-          />)
-  })}
+        {graph.nodes.map((node) => {
+          const nodeId = layout.nodeId()(node);
+          return (
+            <BarRounded
+              x={node.x0!}
+              height={node.y1! - node.y0!}
+              width={node.x1! - node.x0!}
+              y={node.y0 as number}
+              onClick={() => handleSelect(node)}
+              radius={2.5}
+              fill={`url(#${gradientSeq[indexToGradient(node.index!)].name})`}
+              all
+              css={[selected === nodeId && tw`animate-pulse`]}
+            />
+          );
+        })}
       </g>
     </svg>
   );
