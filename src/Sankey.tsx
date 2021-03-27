@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ChartProps } from "./interfaces";
 import sankeyData from "./data/sankeygreenhouse.json"; // s/o https://github.com/micahstubbs/sankey-datasets
 import { sankey } from "d3-sankey";
@@ -14,10 +14,7 @@ import {
   GradientSteelPurple,
   GradientTealBlue,
 } from "@visx/gradient";
-import {
-  LinkHorizontal,
-  BarRounded,
-} from "@visx/shape";
+import { LinkHorizontal, BarRounded } from "@visx/shape";
 import { Text } from "@visx/text";
 import tw from "twin.macro";
 
@@ -59,6 +56,8 @@ function indexToGradient(i: number) {
 }
 
 export default function SankeyPlot({ height, width }: ChartProps) {
+  const [selected, setSelected] = useState("");
+
   const graph = useMemo(
     () =>
       layout.extent([
@@ -70,16 +69,43 @@ export default function SankeyPlot({ height, width }: ChartProps) {
       }),
     [height, width]
   );
+
   const maxDepth = useMemo(
     () => Math.max(...graph.nodes.map((n) => n.depth!)),
     [graph]
   );
-  console.log(graph.nodes);
+
+  const handleSelect = useCallback(node => {
+      const id = layout.nodeId()(node) as string;
+      if (selected === id) setSelected('');
+      else setSelected(id);
+  }, [selected])
+
+  const activeLinks = useMemo(() => {
+      if (selected === '') return new Set();
+      return new Set(graph.links.filter(l => 
+          layout.nodeId()(l.source as any) === selected || layout.nodeId()(l.target as any) === selected
+      ));
+  },[selected, graph])
+
   return (
     <svg height={height} width={width}>
       {gradientSeq.map((G) => (
         <G id={G.name} />
       ))}
+      <g>
+        {graph.nodes.map((node) => (
+          <Text
+            dx={node.depth === maxDepth ? node.x0! - 2 : node.x1! + 2}
+            dy={node.y0! + (node.y1! - node.y0!) / 2}
+            verticalAnchor="middle"
+            textAnchor={node.depth === maxDepth ? "end" : "start"}
+            tw="font-mono text-sm"
+          >
+            {node.name}
+          </Text>
+        ))}
+      </g>
       <g>
         {graph.links.map((link) => (
           <LinkHorizontal
@@ -89,35 +115,27 @@ export default function SankeyPlot({ height, width }: ChartProps) {
             x={(n) => n.x}
             y={(n) => n.y}
             fill="none"
-            stroke="grey"
+            stroke={activeLinks.has(link) ? "firebrick" : "grey"}
             strokeWidth={link.width}
             tw="opacity-20 hover:opacity-60"
           />
         ))}
       </g>
       <g>
-        {graph.nodes.map((node) => (
-          <>
-            <BarRounded
-              x={node.x0!}
-              height={node.y1! - node.y0!}
-              width={node.x1! - node.x0!}
-              y={node.y0 as number}
-              radius={2.5}
-              fill={`url(#${gradientSeq[indexToGradient(node.index!)].name})`}
-              all
-            />
-            <Text
-              dx={node.depth === maxDepth ? node.x0! - 2 : node.x1! + 2}
-              dy={node.y0! + (node.y1! - node.y0!) / 2}
-              verticalAnchor="middle"
-              textAnchor={node.depth === maxDepth ? "end" : "start"}
-              tw="font-mono text-sm"
-            >
-              {node.name}
-            </Text>
-          </>
-        ))}
+        {graph.nodes.map((node) => { 
+        const nodeId = layout.nodeId()(node);
+          return (<BarRounded
+            x={node.x0!}
+            height={node.y1! - node.y0!}
+            width={node.x1! - node.x0!}
+            y={node.y0 as number}
+            onClick={() => handleSelect(node)}
+            radius={2.5}
+            fill={`url(#${gradientSeq[indexToGradient(node.index!)].name})`}
+            all
+            css={[selected === nodeId && tw`animate-pulse`]}
+          />)
+  })}
       </g>
     </svg>
   );
