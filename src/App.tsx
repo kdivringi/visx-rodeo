@@ -5,6 +5,8 @@ import CalendarPlot from "./CalendarPlot";
 import { ParentSize } from "@visx/responsive";
 import tw from "twin.macro";
 import { css } from "@emotion/react";
+import { ChartProps } from "./interfaces";
+import SankeyPlot from "./Sankey";
 
 const linkStyle = tw`block hover:font-semibold text-blue-600 visited:text-purple-600`;
 
@@ -37,7 +39,7 @@ const appNav = css`
 interface IChartEntry {
   name: string;
   key: string;
-  component: React.FunctionComponent<{ height: number; width: number }>;
+  component: React.FunctionComponent<ChartProps>;
 }
 
 const CHARTS: IChartEntry[] = [
@@ -45,6 +47,7 @@ const CHARTS: IChartEntry[] = [
   { name: "Grouped Bars", component: BarGrouped, key: "groupBar" },
   { name: "Stacked Bars", component: BarStacked, key: "stackBar" },
   { name: "Calendar Plot", component: CalendarPlot, key: "calendar" },
+  { name: "Sankey Plot", component: SankeyPlot, key: 'sankey'}
 ];
 
 function App() {
@@ -76,7 +79,6 @@ function App() {
             {name}
           </a>
         ))}
-        <div>Sankey</div>
         <div>SPLOM</div>
         <div>Sparklines</div>
         <div>Hexbins</div>

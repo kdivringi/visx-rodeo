@@ -6,19 +6,19 @@ import { Group } from "@visx/group";
 import { AxisBottom, AxisRight } from "@visx/axis";
 import { Text } from "@visx/text";
 import * as time from "d3-time";
-import * as array from "d3-array";
+import { extent, group } from "d3-array";
 import * as format from "d3-time-format";
 
 // Sunday based week & day
 const toWeekYear = format.timeFormat("%Y W%U");
 const toDay = format.timeFormat("%w");
 
-const [minDate, maxDate] = array.extent(
+const [minDate, maxDate] = extent(
   cityTemperature,
   (d) => new Date(d.date)
 ) as [Date, Date];
 
-const df = array.group(cityTemperature, (d) => toWeekYear(new Date(d.date)));
+const df = group(cityTemperature, (d) => toWeekYear(new Date(d.date)));
 type City = "San Francisco" | "Austin" | "New York";
 type BinDf = Record<City, NonNullable<ReturnType<typeof genBins>>>;
 const binDf: BinDf = {
@@ -48,7 +48,7 @@ for (const [i, week] of weekStarts.entries()) {
   }
 }
 
-const [minTemp, maxTemp] = array.extent([
+const [minTemp, maxTemp] = extent([
   ...cityTemperature.map((c) => +c.Austin),
   ...cityTemperature.map((c) => +c["New York"]),
   ...cityTemperature.map((c) => +c["San Francisco"]),
