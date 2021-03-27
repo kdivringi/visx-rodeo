@@ -2,14 +2,24 @@ import React, { useMemo } from "react";
 import { ChartProps } from "./interfaces";
 import sankeyData from "./data/sankeygreenhouse.json"; // s/o https://github.com/micahstubbs/sankey-datasets
 import { sankey } from "d3-sankey";
-import { GradientLightgreenGreen } from "@visx/gradient";
 import {
-  LinkHorizontalCurve,
+  GradientLightgreenGreen,
+  GradientDarkgreenGreen,
+  GradientOrangeRed,
+  GradientPinkBlue,
+  GradientPinkRed,
+  GradientPurpleOrange,
+  GradientPurpleRed,
+  GradientPurpleTeal,
+  GradientSteelPurple,
+  GradientTealBlue,
+} from "@visx/gradient";
+import {
   LinkHorizontal,
-  LinkHorizontalLine,
-  pathHorizontalCurve,
   BarRounded,
 } from "@visx/shape";
+import { Text } from "@visx/text";
+import { css } from "@emotion/react";
 
 interface Node {
   name: string;
@@ -31,7 +41,30 @@ const layout = sankey<Node, Link>().nodeId((d) => d.name);
 
 const padding = 10;
 
-const gradientId = "node-gradient";
+const gradientSeq = [
+  GradientLightgreenGreen,
+  GradientDarkgreenGreen,
+  GradientOrangeRed,
+  GradientPinkBlue,
+  GradientPinkRed,
+  GradientPurpleOrange,
+  GradientPurpleRed,
+  GradientPurpleTeal,
+  GradientSteelPurple,
+  GradientTealBlue,
+];
+
+function indexToGradient(i: number) {
+  return i % gradientSeq.length;
+}
+
+const linkClass = css`
+  opacity: 0.2;
+  &:hover {
+    opacity: 0.6;
+  }
+`;
+
 export default function SankeyPlot({ height, width }: ChartProps) {
   const graph = useMemo(
     () =>
@@ -44,43 +77,55 @@ export default function SankeyPlot({ height, width }: ChartProps) {
       }),
     [height, width]
   );
-  const linkToNode = useMemo(
-    () => new Map(graph.nodes.map((n) => [layout.nodeId()(n), n])),
+  const maxDepth = useMemo(
+    () => Math.max(...graph.nodes.map((n) => n.depth!)),
     [graph]
   );
-  console.log(graph)
+  console.log(graph.nodes);
   return (
     <svg height={height} width={width}>
-      <GradientLightgreenGreen id={gradientId} />
+      {gradientSeq.map((G) => (
+        <G id={G.name} />
+      ))}
       <g>
         {graph.links.map((link) => (
           <LinkHorizontal
             data={link}
-            source={l => ({ x: l.source.x1, y: l.y0 } )}
-            target={l => ({ x: l.target.x0, y: l.y1 })}
-            x={n => n.x}
-            y={n => n.y}
+            source={(l: any) => ({ x: l.source.x1, y: l.y0 })}
+            target={(l: any) => ({ x: l.target.x0, y: l.y1 })}
+            x={(n) => n.x}
+            y={(n) => n.y}
             fill="none"
-            stroke="firebrick"
+            stroke="grey"
             strokeWidth={link.width}
-            opacity={0.2}
+            css={linkClass}
           />
         ))}
       </g>
       <g>
         {graph.nodes.map((node) => (
-          <BarRounded
-            x={node.x0 as number}
-            height={(node.y1 as number) - (node.y0 as number)}
-            width={(node.x1 as number) - (node.x0 as number)}
-            y={node.y0 as number}
-            radius={2.5}
-            fill={`url(#${gradientId})`}
-            all
-          />
+          <>
+            <BarRounded
+              x={node.x0!}
+              height={node.y1! - node.y0!}
+              width={node.x1! - node.x0!}
+              y={node.y0 as number}
+              radius={2.5}
+              fill={`url(#${gradientSeq[indexToGradient(node.index!)].name})`}
+              all
+            />
+            <Text
+              dx={node.depth === maxDepth ? node.x0! - 2 : node.x1! + 2}
+              dy={node.y0! + (node.y1! - node.y0!) / 2}
+              verticalAnchor="middle"
+              textAnchor={node.depth === maxDepth ? "end" : "start"}
+              tw="font-mono text-sm"
+            >
+              {node.name}
+            </Text>
+          </>
         ))}
       </g>
     </svg>
   );
-  return <p>A sankey</p>;
 }
